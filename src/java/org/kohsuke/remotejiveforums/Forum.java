@@ -35,6 +35,19 @@ public final class Forum {
         return new Forum(site,forumId,wc);
     }
 
+    /**
+     * Creates a new {@link Forum}.
+     *
+     * @param site
+     *      An URL like "http://forums.java.net/jive" -- the root dir of the JIVE installation
+     *      on the server.
+     * @param forumId
+     *      Forum ID to connect. Check the URL of the forum to find the forum ID.
+     */
+    public static Forum get( URL site, int forumId) {
+        return get(site,forumId,new WebConversation());
+    }
+
 
 
     final URL siteURL;
