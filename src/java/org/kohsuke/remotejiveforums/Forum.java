@@ -76,12 +76,7 @@ public final class Forum {
                 rsp = form.submit(submit);
 
                 // extract the topic id
-                String url = rsp.getURL().toString();
-                int idx = url.lastIndexOf("threadID=");
-                if(idx==-1)
-                    throw new ProcessingException("unable to extract thread ID from "+url);
-
-                return getTopic(Integer.parseInt(url.substring(idx+9)));
+                return getTopic(rsp.getURL());
             }
         }.run();
     }
@@ -93,5 +88,14 @@ public final class Forum {
             topics.put(threadId,topic);
         }
         return topic;
+    }
+
+    public Topic getTopic(URL url) {
+        String u = url.toString();
+        int idx = u.lastIndexOf("threadID=");
+        if(idx==-1)
+            throw new IllegalArgumentException("unable to extract thread ID from "+url);
+
+        return getTopic(Integer.parseInt(u.substring(idx+9)));
     }
 }
