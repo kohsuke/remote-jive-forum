@@ -98,4 +98,12 @@ public final class Forum {
 
         return getTopic(Integer.parseInt(u.substring(idx+9)));
     }
+
+    /**
+     * Returns the {@link WebConversation} object used behind the scene.
+     * Use this method only when you know what you are doing.
+     */
+    public WebConversation getConversation() {
+        return wc;
+    }
 }
