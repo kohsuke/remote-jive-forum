@@ -32,7 +32,10 @@ public final class Topic {
      */
     public URL getTopicURL() {
         try {
-            return new URL(forum.siteURL+"/thread.jspa?threadID="+threadId);
+            String url = forum.siteURL.toExternalForm();
+            if(!url.endsWith("/"))
+                url += '/';
+            return new URL(url+"thread.jspa?threadID="+threadId);
         } catch (MalformedURLException e) {
             // impossible
             throw new Error(e);
