@@ -75,7 +75,13 @@
   <build>
     <nagEmailAddress>kk@kohsuke.org</nagEmailAddress>
     <sourceDirectory>src/java</sourceDirectory>
+    
     <unitTestSourceDirectory>src/test</unitTestSourceDirectory>
+    <unitTest>
+      <includes>
+        <include>**/*Test.class</include>
+      </includes>
+    </unitTest>
   </build>
 
 </project>
