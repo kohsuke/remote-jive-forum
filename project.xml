@@ -14,6 +14,8 @@
 
   <shortDescription>Remote API for the JIVE forums</shortDescription>
   <url>http://remote-jive-forums.dev.java.net/</url>
+  
+  <package>org.kohsuke.remotejiveforums</package>
 
   <developers>
     <developer>
