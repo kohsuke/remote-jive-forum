@@ -94,4 +94,63 @@ class Util {
 
         throw new ProcessingException("Unable to find a form with action="+actionName);
     }
+
+    /**
+     * Collapses whitespace
+     */
+    public static String collapse(String text) {
+        int len = text.length();
+
+        // most of the texts are already in the collapsed form.
+        // so look for the first whitespace in the hope that we will
+        // never see it.
+        int s=0;
+        while(s<len) {
+            if(isWhiteSpace(text.charAt(s)))
+                break;
+            s++;
+        }
+        if(s==len)
+            // the input happens to be already collapsed.
+            return text;
+
+        // we now know that the input contains spaces.
+        // let's sit down and do the collapsing normally.
+
+        StringBuilder result = new StringBuilder(len /*allocate enough size to avoid re-allocation*/ );
+
+        if(s!=0) {
+            for( int i=0; i<s; i++ )
+                result.append(text.charAt(i));
+            result.append(' ');
+        }
+
+        boolean inStripMode = true;
+        for (int i = s+1; i < len; i++) {
+            char ch = text.charAt(i);
+            boolean b = isWhiteSpace(ch);
+            if (inStripMode && b)
+                continue; // skip this character
+
+            inStripMode = b;
+            if (inStripMode)
+                result.append(' ');
+            else
+                result.append(ch);
+        }
+
+        // remove trailing whitespaces
+        len = result.length();
+        if (len > 0 && result.charAt(len - 1) == ' ')
+            result.setLength(len - 1);
+        // whitespaces are already collapsed,
+        // so all we have to do is to remove the last one character
+        // if it's a whitespace.
+
+        return result.toString();
+    }
+
+    public static final boolean isWhiteSpace(char ch) {
+        return ch == 0x9 || ch == 0xA || ch == 0xD || ch == 0x20;
+    }
 }

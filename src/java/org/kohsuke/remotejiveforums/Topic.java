@@ -54,7 +54,7 @@ public final class Topic {
                     throw new ProcessingException("Unable to find the title of the topic");
                 title = pageTitle.getText().trim();
 
-                String str = pageTitle.getParent().getText();
+                String str = Util.collapse(pageTitle.getParent().getText());
 
                 int s = str.indexOf("Replies: ")+9;
                 int e = str.indexOf(' ',s);
