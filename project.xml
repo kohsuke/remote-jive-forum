@@ -1,0 +1,81 @@
+<project>
+  <pomVersion>3</pomVersion>
+
+  <id>RemoteJiveForums</id>
+  <name>RemoteJiveForums</name>
+  <groupId>kohsuke</groupId>
+  <currentVersion>1.0</currentVersion>
+  
+  <organization>
+    <name>Kohsuke Kawaguchi</name>
+    <url>http://www.kohsuke.org/</url>
+  </organization>
+  <inceptionYear>2005</inceptionYear>
+
+  <shortDescription>Remote API for the JIVE forums</shortDescription>
+  <url>http://remote-jive-forums.dev.java.net/</url>
+
+  <developers>
+    <developer>
+      <name>Kohsuke Kawaguchi</name>
+      <id>kohsuke</id>
+      <email>kk@kohsuke.org</email>
+    </developer>
+  </developers>
+
+  <dependencies>
+
+    <dependency>
+      <id>httpunit</id>
+      <version>1.5.4</version>
+    </dependency>
+
+    <dependency>
+      <id>xml-apis</id>
+      <version>2.0.0</version>
+    </dependency>
+
+    <dependency>
+      <id>xerces</id>
+      <version>2.2.1</version>
+    </dependency>
+
+    <dependency>
+      <id>jtidy</id>
+      <version>4aug2000r7-dev</version>
+    </dependency>
+
+    <dependency>
+      <id>nekohtml</id>
+      <version>0.7.7</version>
+    </dependency>
+
+    <dependency>
+      <id>dom4j</id>
+      <version>1.4</version>
+    </dependency>
+
+    <dependency>
+      <id>jaxen</id>
+      <version>1.0-FCS-full</version>
+    </dependency>
+
+    <dependency>
+      <id>junit</id>
+      <version>3.8.1</version>
+    </dependency>
+
+    <dependency>
+      <id>maven-retroweaver-plugin</id>
+      <version>1.1.0</version>
+      <type>plugin</type>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <nagEmailAddress>kk@kohsuke.org</nagEmailAddress>
+    <sourceDirectory>src/java</sourceDirectory>
+    <unitTestSourceDirectory>src/test</unitTestSourceDirectory>
+  </build>
+
+</project>
