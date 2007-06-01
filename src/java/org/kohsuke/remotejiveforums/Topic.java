@@ -3,11 +3,18 @@ package org.kohsuke.remotejiveforums;
 import com.meterware.httpunit.WebResponse;
 import org.dom4j.Document;
 import org.dom4j.Node;
+import org.dom4j.Element;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Date;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * Represents one topic in a forum like
@@ -21,6 +28,7 @@ public final class Topic {
 
     private int replies;
     private String title;
+    private Post post;
 
     public Topic(Forum forum, int threadId) {
         this.forum = forum;
@@ -87,4 +95,51 @@ public final class Topic {
         parsePageTitle();
         return title;
     }
+
+    public Post getPost() throws ProcessingException {
+        if(post==null) {
+            post = new Scraper<Post>("Parsing posts") {
+                public Post scrape() throws IOException, SAXException {
+                    WebResponse rsp = forum.wc.getResponse(getTopicURL().toExternalForm());
+                    Document doc = Util.getDom4j(rsp);
+                    List<Node> posts = doc.selectNodes("//DIV[@class='jive-messagebox']");
+
+                    Map<Integer,Post> byIds = new HashMap<Integer,Post>();
+                    Post rootPost = null;
+
+                    for (Node post : posts) {
+                        String postId = post.selectSingleNode("TABLE//TR[starts-with(@id,'jive-message-')]/@id").getText().trim().substring("jive-message-".length());
+                        String poster = post.selectSingleNode(".//NOBR/A[starts-with(@href,'profile.jspa')]").getText().trim();
+                        Node descriptionNode = post.selectSingleNode(".//TD[@class='jive-last']//SPAN[@class='jive-description']");
+                        String date = Util.collapse(descriptionNode.getText().trim());
+                        Matcher m = POSTED_DATE_PATTERN.matcher(date);
+                        if(!m.matches())
+                            throw new ProcessingException("Failed to parse "+date);
+                        date = m.group(1);
+
+                        String parent = null;
+                        Node parentLink = descriptionNode.selectSingleNode("NOBR/A[IMG]/@href");
+                        if(parentLink!=null) {
+                            parent = parentLink.getText();
+                            parent = parent.substring(parent.lastIndexOf('#')+1);
+                        }
+
+                        Element body = (Element) post.selectSingleNode(".//TD[@class='jive-last']/TABLE//TR/TD[@colspan='4']");
+
+                        Post p = new Post(Integer.parseInt(postId),poster,new Date(date),
+                            parent==null?null: byIds.get(Integer.parseInt(parent)), body);
+                        byIds.put(p.getId(),p);
+
+                        if(rootPost==null)
+                            rootPost = p;
+                    }
+
+                    return rootPost;
+                }
+            }.run();
+        }
+        return post;
+    }
+
+    private static final Pattern POSTED_DATE_PATTERN = Pattern.compile("Posted: (.+ [AP]M).*");
 }
