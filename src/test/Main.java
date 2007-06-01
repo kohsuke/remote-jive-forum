@@ -30,12 +30,23 @@ public class Main {
         form.setParameter("password","kohsuke");
         r = form.submit();
 
-        Forum forum = Forum.get(new URL("http://forums.java.net/jive/"),49,wc);
-        // post(forum,wc);
+        testTopicListing(wc);
 
-        Topic topic = new Topic(forum, 2597);
-        Post pt = topic.getPost();
-        System.out.println(pt);
+        //Forum forum = Forum.get(new URL("http://forums.java.net/jive/"),49,wc);
+        //// post(forum,wc);
+        //
+        //Topic topic = new Topic(forum, 2597);
+        //Post pt = topic.getPost();
+        //System.out.println(pt);
+    }
+
+    private static void testTopicListing(WebConversation wc) throws MalformedURLException, ProcessingException {
+        Forum forum = Forum.get(new URL("http://forums.java.net/jive/"),94,wc);
+        for (Topic t : forum.getTopics()) {
+            System.out.println(t.getTitle());
+            //System.out.println(t.getPost().getPoster());
+        }
+
     }
 
     private static Topic post(WebConversation wc, Forum forum) throws MalformedURLException, ProcessingException {

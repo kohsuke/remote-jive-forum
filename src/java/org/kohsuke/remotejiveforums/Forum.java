@@ -11,6 +11,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.Iterator;
 
 /**
  * Represents one JIVE forum like
@@ -99,6 +100,14 @@ public final class Forum {
         return getTopic(Integer.parseInt(u.substring(idx+9)));
     }
 
+    public Iterable<Topic> getTopics() {
+        return new Iterable<Topic>() {
+            public Iterator<Topic> iterator() {
+                return new TopicIterator(Forum.this);
+            }
+        };
+    }
+
     /**
      * Returns the {@link WebConversation} object used behind the scene.
      * Use this method only when you know what you are doing.
@@ -106,4 +115,5 @@ public final class Forum {
     public WebConversation getConversation() {
         return wc;
     }
+
 }
