@@ -44,7 +44,10 @@ public class Main {
         Forum forum = Forum.get(new URL("http://forums.java.net/jive/"),94,wc);
         for (Topic t : forum.getTopics()) {
             System.out.println(t.getTitle());
-            //System.out.println(t.getPost().getPoster());
+            System.out.println(t.getPost().getPoster());
+            System.out.println(t.getPost().getBodyString());
+
+            System.out.println("-------------");
         }
 
     }

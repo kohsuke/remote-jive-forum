@@ -56,7 +56,7 @@ public final class Topic {
     private void parsePageTitle() throws ProcessingException {
         if(title!=null)     return;
 
-        new Scraper<Void>("Parsing the page title") {
+        new Scraper<Void>("Parsing the topic "+getTopicURL()) {
             public Void scrape() throws IOException, SAXException {
                 WebResponse rsp = forum.wc.getResponse(getTopicURL().toExternalForm());
                 Document doc = Util.getDom4j(rsp);
@@ -78,6 +78,38 @@ public final class Topic {
                     throw new ProcessingException("Unable to find the reply count of the topic");
                 replies = Integer.parseInt(str.substring(s).trim());
 
+                // parse messages
+                List<Node> posts = doc.selectNodes("//DIV[@class='jive-messagebox']");
+
+                Map<Integer,Post> byIds = new HashMap<Integer,Post>();
+
+                for (Node post : posts) {
+                    String postId = post.selectSingleNode("TABLE//TR[starts-with(@id,'jive-message-')]/@id").getText().trim().substring("jive-message-".length());
+                    String poster = post.selectSingleNode(".//NOBR/A[starts-with(@href,'profile.jspa')]").getText().trim();
+                    Node descriptionNode = post.selectSingleNode(".//TD[@class='jive-last']//SPAN[@class='jive-description']");
+                    String date = Util.collapse(descriptionNode.getText().trim());
+                    Matcher m = POSTED_DATE_PATTERN.matcher(date);
+                    if(!m.matches())
+                        throw new ProcessingException("Failed to parse "+date);
+                    date = m.group(1);
+
+                    String parent = null;
+                    Node parentLink = descriptionNode.selectSingleNode("NOBR/A[IMG]/@href");
+                    if(parentLink!=null) {
+                        parent = parentLink.getText();
+                        parent = parent.substring(parent.lastIndexOf('#')+1);
+                    }
+
+                    Element body = (Element) post.selectSingleNode(".//TD[@class='jive-last']/TABLE//TR/TD[@colspan='4']");
+
+                    Post p = new Post(Integer.parseInt(postId),poster,new Date(date),
+                        parent==null?null: byIds.get(Integer.parseInt(parent)), body);
+                    byIds.put(p.getId(),p);
+
+                    if(Topic.this.post==null)
+                        Topic.this.post = p;
+                }
+
                 return null;
             }
         }.run();
@@ -97,47 +129,7 @@ public final class Topic {
     }
 
     public Post getPost() throws ProcessingException {
-        if(post==null) {
-            post = new Scraper<Post>("Parsing posts") {
-                public Post scrape() throws IOException, SAXException {
-                    WebResponse rsp = forum.wc.getResponse(getTopicURL().toExternalForm());
-                    Document doc = Util.getDom4j(rsp);
-                    List<Node> posts = doc.selectNodes("//DIV[@class='jive-messagebox']");
-
-                    Map<Integer,Post> byIds = new HashMap<Integer,Post>();
-                    Post rootPost = null;
-
-                    for (Node post : posts) {
-                        String postId = post.selectSingleNode("TABLE//TR[starts-with(@id,'jive-message-')]/@id").getText().trim().substring("jive-message-".length());
-                        String poster = post.selectSingleNode(".//NOBR/A[starts-with(@href,'profile.jspa')]").getText().trim();
-                        Node descriptionNode = post.selectSingleNode(".//TD[@class='jive-last']//SPAN[@class='jive-description']");
-                        String date = Util.collapse(descriptionNode.getText().trim());
-                        Matcher m = POSTED_DATE_PATTERN.matcher(date);
-                        if(!m.matches())
-                            throw new ProcessingException("Failed to parse "+date);
-                        date = m.group(1);
-
-                        String parent = null;
-                        Node parentLink = descriptionNode.selectSingleNode("NOBR/A[IMG]/@href");
-                        if(parentLink!=null) {
-                            parent = parentLink.getText();
-                            parent = parent.substring(parent.lastIndexOf('#')+1);
-                        }
-
-                        Element body = (Element) post.selectSingleNode(".//TD[@class='jive-last']/TABLE//TR/TD[@colspan='4']");
-
-                        Post p = new Post(Integer.parseInt(postId),poster,new Date(date),
-                            parent==null?null: byIds.get(Integer.parseInt(parent)), body);
-                        byIds.put(p.getId(),p);
-
-                        if(rootPost==null)
-                            rootPost = p;
-                    }
-
-                    return rootPost;
-                }
-            }.run();
-        }
+        parsePageTitle();
         return post;
     }
 
