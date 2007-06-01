@@ -49,21 +49,26 @@ public final class Topic {
         if(title!=null)     return;
 
         new Scraper<Void>("Parsing the page title") {
-            public Void scrape() throws IOException, SAXException, ProcessingException {
+            public Void scrape() throws IOException, SAXException {
                 WebResponse rsp = forum.wc.getResponse(getTopicURL().toExternalForm());
                 Document doc = Util.getDom4j(rsp);
-                Node pageTitle = doc.selectSingleNode("//P/SPAN[@class='jive-page-title']");
+                Node pageTitle = doc.selectSingleNode("//P[@class='jive-page-title']");
                 if(pageTitle==null)
                     throw new ProcessingException("Unable to find the title of the topic");
                 title = pageTitle.getText().trim();
+                if(title.startsWith("Thread: ")) {
+                    // it's always supposed to start with 'Thread:' but be defensive
+                    title = title.substring("Thread: ".length());
+                }
 
-                String str = Util.collapse(pageTitle.getParent().getText());
+                Node firstLast = doc.selectSingleNode("//TH[@class='jive-first-last']//NOBR");
 
-                int s = str.indexOf("Replies: ")+9;
-                int e = str.indexOf(' ',s);
-                if(s==-1 || e==-1 || s>=e)
+                String str = firstLast.getText().trim();
+
+                int s = str.indexOf("Replies:")+8;
+                if(s==-1)
                     throw new ProcessingException("Unable to find the reply count of the topic");
-                replies = Integer.parseInt(str.substring(s,e));
+                replies = Integer.parseInt(str.substring(s).trim());
 
                 return null;
             }
